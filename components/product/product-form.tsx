@@ -1,7 +1,7 @@
 'use client';
 
 import { Product } from '@prisma/client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface ProductFormProps {
@@ -10,10 +10,64 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ product, action }: ProductFormProps) {
-    const [images, setImages] = useState<string[]>(product ? JSON.parse(product.images) : []);
-    const [isPending, setIsPending] = useState(false);
+    // Images
+    const [existingImages, setExistingImages] = useState<string[]>(product && product.images ? JSON.parse(product.images) : []);
+    const [previewImages, setPreviewImages] = useState<string[]>([]);
 
+    // Box Content
+    // @ts-ignore: Pending Prisma Client regeneration for boxContent type
+    const initialBoxContent = product?.boxContent ? JSON.parse(product.boxContent) : [];
+    const [boxItems, setBoxItems] = useState<string[]>(Array.isArray(initialBoxContent) ? initialBoxContent : []);
+    const [newBoxItem, setNewBoxItem] = useState('');
+
+    // Specifications
+    // @ts-ignore: Pending Prisma Client regeneration for specifications type
+    const initialSpecs = product?.specifications ? JSON.parse(product.specifications) : {};
+    const [specs, setSpecs] = useState<{ key: string; value: string }[]>(
+        Object.entries(initialSpecs).map(([key, value]) => ({ key, value: String(value) }))
+    );
+    const [newSpecKey, setNewSpecKey] = useState('');
+    const [newSpecValue, setNewSpecValue] = useState('');
+
+    const [isPending, setIsPending] = useState(false);
     const router = useRouter();
+
+    // Image Handle
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files) {
+            const newPreviews: string[] = [];
+            Array.from(files).forEach(file => {
+                newPreviews.push(URL.createObjectURL(file));
+            });
+            setPreviewImages(newPreviews);
+        }
+    };
+
+    // Box Content Handle
+    const addBoxItem = () => {
+        if (newBoxItem.trim()) {
+            setBoxItems([...boxItems, newBoxItem.trim()]);
+            setNewBoxItem('');
+        }
+    };
+
+    const removeBoxItem = (index: number) => {
+        setBoxItems(boxItems.filter((_, i) => i !== index));
+    };
+
+    // Specs Handle
+    const addSpec = () => {
+        if (newSpecKey.trim() && newSpecValue.trim()) {
+            setSpecs([...specs, { key: newSpecKey.trim(), value: newSpecValue.trim() }]);
+            setNewSpecKey('');
+            setNewSpecValue('');
+        }
+    };
+
+    const removeSpec = (index: number) => {
+        setSpecs(specs.filter((_, i) => i !== index));
+    };
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -45,6 +99,12 @@ export function ProductForm({ product, action }: ProductFormProps) {
             <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-6 md:p-8 space-y-8">
 
+                    {/* Hidden Inputs for JSON Data */}
+                    <input type="hidden" name="boxContent" value={JSON.stringify(boxItems)} />
+                    <input type="hidden" name="specifications" value={JSON.stringify(
+                        specs.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {})
+                    )} />
+
                     {/* Info Basica */}
                     <section className="space-y-6">
                         <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
@@ -69,6 +129,19 @@ export function ProductForm({ product, action }: ProductFormProps) {
                                     <input name="price" type="number" defaultValue={product?.price} required min="0" step="0.01" placeholder="0.00" className="w-full rounded-lg border-gray-300 focus:border-gray-900 focus:ring-gray-900 h-12 pl-8 pr-4 text-gray-900 placeholder:text-gray-400" />
                                 </div>
                             </label>
+
+                            <div className="flex flex-col gap-2">
+                                <span className="text-sm font-semibold text-gray-700">Estado</span>
+                                <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors h-12">
+                                    <input
+                                        type="checkbox"
+                                        name="inStock"
+                                        defaultChecked={product ? product.inStock : true}
+                                        className="w-5 h-5 text-gray-900 focus:ring-gray-900 border-gray-300 rounded"
+                                    />
+                                    <span className="text-gray-900 font-medium">En Stock (Disponible para venta)</span>
+                                </label>
+                            </div>
                         </div>
                     </section>
 
@@ -84,6 +157,77 @@ export function ProductForm({ product, action }: ProductFormProps) {
                         </label>
                     </section>
 
+                    {/* Specifications (Dynamic) */}
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                            <span className="material-symbols-outlined text-gray-500">tune</span>
+                            <h3 className="text-lg font-bold text-gray-900">Especificaciones</h3>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <input
+                                value={newSpecKey}
+                                onChange={(e) => setNewSpecKey(e.target.value)}
+                                placeholder="Nombre (ej. Material)"
+                                className="flex-1 rounded-lg border-gray-300 focus:border-gray-900 focus:ring-gray-900 h-10 px-3 text-sm"
+                            />
+                            <input
+                                value={newSpecValue}
+                                onChange={(e) => setNewSpecValue(e.target.value)}
+                                placeholder="Valor (ej. Algodón)"
+                                className="flex-1 rounded-lg border-gray-300 focus:border-gray-900 focus:ring-gray-900 h-10 px-3 text-sm"
+                            />
+                            <button type="button" onClick={addSpec} className="px-4 h-10 bg-gray-900 text-white rounded-lg text-sm font-bold">Agregar</button>
+                        </div>
+
+                        {specs.length > 0 && (
+                            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                                {specs.map((item, idx) => (
+                                    <div key={idx} className="flex justify-between items-center bg-white p-2 rounded border border-gray-200">
+                                        <div className="text-sm">
+                                            <span className="font-bold text-gray-700">{item.key}:</span> <span className="text-gray-600">{item.value}</span>
+                                        </div>
+                                        <button type="button" onClick={() => removeSpec(idx)} className="text-red-500 hover:text-red-700">
+                                            <span className="material-symbols-outlined text-lg">delete</span>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </section>
+
+                    {/* Box Content (Dynamic) */}
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                            <span className="material-symbols-outlined text-gray-500">package_2</span>
+                            <h3 className="text-lg font-bold text-gray-900">Contenido</h3>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <input
+                                value={newBoxItem}
+                                onChange={(e) => setNewBoxItem(e.target.value)}
+                                placeholder="Item (ej. Manual de usuario)"
+                                className="flex-1 rounded-lg border-gray-300 focus:border-gray-900 focus:ring-gray-900 h-10 px-3 text-sm"
+                            />
+                            <button type="button" onClick={addBoxItem} className="px-4 h-10 bg-gray-900 text-white rounded-lg text-sm font-bold">Agregar</button>
+                        </div>
+
+                        {boxItems.length > 0 && (
+                            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                                {boxItems.map((item, idx) => (
+                                    <div key={idx} className="flex justify-between items-center bg-white p-2 rounded border border-gray-200">
+                                        <span className="text-sm text-gray-700">{item}</span>
+                                        <button type="button" onClick={() => removeBoxItem(idx)} className="text-red-500 hover:text-red-700">
+                                            <span className="material-symbols-outlined text-lg">delete</span>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </section>
+
+
                     {/* Imagenes */}
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
@@ -96,6 +240,7 @@ export function ProductForm({ product, action }: ProductFormProps) {
                                 name="images"
                                 multiple
                                 accept="image/*"
+                                onChange={handleImageChange}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
                             <div className="w-12 h-12 rounded-full bg-white border border-gray-200 text-gray-600 flex items-center justify-center shadow-sm">
@@ -110,12 +255,25 @@ export function ProductForm({ product, action }: ProductFormProps) {
                             </div>
                         </div>
 
-                        {/* Existing Images Preview */}
-                        {images.length > 0 && (
+                        {/* Combined Image Previews */}
+                        {(existingImages.length > 0 || previewImages.length > 0) && (
                             <div className="grid grid-cols-4 md:grid-cols-6 gap-4 mt-4">
-                                {images.map((img, idx) => (
-                                    <div key={idx} className="aspect-square rounded-lg bg-gray-100 border border-gray-200 overflow-hidden relative group">
+
+                                {/* Existing */}
+                                {existingImages.map((img, idx) => (
+                                    <div key={`existing-${idx}`} className="aspect-square rounded-lg bg-gray-100 border border-gray-200 overflow-hidden relative group">
+                                        <div className="absolute top-1 right-1 bg-white/80 rounded-full p-1 text-xs font-bold text-gray-600 z-10">Anterior</div>
                                         <div className="w-full h-full bg-center bg-no-repeat bg-cover" style={{ backgroundImage: `url("${img}")` }}></div>
+                                    </div>
+                                ))}
+
+                                {/* New Previews */}
+                                {previewImages.map((img, idx) => (
+                                    <div key={`new-${idx}`} className="aspect-square rounded-lg bg-gray-100 border-2 border-green-500 overflow-hidden relative group">
+                                        <div className="absolute top-1 right-1 bg-green-500 text-white rounded-full p-0.5 z-10">
+                                            <span className="material-symbols-outlined text-sm block">check</span>
+                                        </div>
+                                        <img src={img} alt="Preview" className="w-full h-full object-cover" />
                                     </div>
                                 ))}
                             </div>

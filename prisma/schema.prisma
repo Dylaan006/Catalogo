@@ -11,28 +11,34 @@ datasource db {
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  name        String
-  description String
-  price       Float
-  category    String
+  id             String      @id @default(cuid())
+  name           String
+  description    String
+  price          Float
+  category       String
   // SQLite does not support scalar lists (String[]). 
   // We will store images as a JSON stringified array.
-  images      String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
+  images         String
+  // JSON stringified array of items
+  boxContent     String      @default("[]")
+  // JSON stringified key-value pairs
+  specifications String      @default("{}")
+  inStock        Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  orderItems     OrderItem[]
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  role      String   @default("USER") // ADMIN, USER
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  name        String
+  phoneNumber String?
+  role        String   @default("USER") // ADMIN, USER
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
 }
 
 model Order {

@@ -31,6 +31,7 @@ const RegisterSchema = z.object({
     name: z.string().min(2),
     email: z.string().email(),
     password: z.string().min(6),
+    phoneNumber: z.string().min(10, "El número debe tener al menos 10 dígitos"),
 });
 
 export async function register(prevState: string | undefined, formData: FormData) {
@@ -38,13 +39,14 @@ export async function register(prevState: string | undefined, formData: FormData
         name: formData.get('name'),
         email: formData.get('email'),
         password: formData.get('password'),
+        phoneNumber: formData.get('phoneNumber'),
     });
 
     if (!validatedFields.success) {
         return 'Campos inválidos. Por favor verifique sus datos.';
     }
 
-    const { name, email, password } = validatedFields.data;
+    const { name, email, password, phoneNumber } = validatedFields.data;
 
     try {
         const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -57,6 +59,8 @@ export async function register(prevState: string | undefined, formData: FormData
                 name,
                 email,
                 password: hashedPassword,
+                // @ts-ignore: Pending Prisma Client regeneration
+                phoneNumber,
                 role: 'USER',
             },
         });

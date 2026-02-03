@@ -27,15 +27,20 @@ export function ProductCard({ product }: ProductCardProps) {
                 aria-label={product.name}
             ></div>
 
-            <div className="p-4 flex flex-col gap-1">
+            <div className="p-3 md:p-4 flex flex-col gap-1">
                 <div className="flex justify-between items-start">
-                    <p className="text-gray-500 text-xs font-bold uppercase tracking-wider">{product.category}</p>
-                    <p className="text-gray-900 font-bold">{formattedPrice}</p>
+                    <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-wider">{product.category}</p>
+                    <div className="flex flex-col items-end">
+                        <p className="text-gray-900 font-bold text-sm md:text-base">{formattedPrice}</p>
+                        {!product.inStock && (
+                            <span className="text-[10px] font-medium text-red-500">Sin Stock</span>
+                        )}
+                    </div>
                 </div>
-                <h3 className="text-gray-900 text-base font-semibold leading-tight group-hover:text-primary transition-colors">
+                <h3 className="text-gray-900 text-sm md:text-base font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2">
                     {product.name}
                 </h3>
-                <p className="text-gray-500 text-xs mt-1 line-clamp-1">
+                <p className="text-gray-500 text-[10px] md:text-xs mt-1 line-clamp-1">
                     {product.description}
                 </p>
             </div>

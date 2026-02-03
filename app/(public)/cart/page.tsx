@@ -77,13 +77,18 @@ export default function CartPage() {
                                             {(() => {
                                                 let images: string[] = [];
                                                 try {
-                                                    images = JSON.parse(item.product.images);
+                                                    if (item.product.images) {
+                                                        images = JSON.parse(item.product.images);
+                                                    }
                                                 } catch (e) { images = [] }
 
-                                                if (typeof images === 'string') images = [images];
-                                                if (!Array.isArray(images) || images.length === 0) images = [];
+                                                // @ts-ignore
+                                                const flatImage = item.product.image;
 
-                                                const coverImage = images[0];
+                                                if (typeof images === 'string') images = [images];
+                                                if (!Array.isArray(images)) images = [];
+
+                                                const coverImage = images[0] || flatImage;
 
                                                 if (coverImage) {
                                                     return <img src={coverImage} alt={item.product.name} className="w-full h-full object-cover" />
@@ -135,14 +140,14 @@ export default function CartPage() {
                                 <p className="text-gray-500 text-sm mb-1">Total a Pagar</p>
                                 <p className="text-4xl font-black text-gray-900">${total.toLocaleString('es-AR')}</p>
                             </div>
-                            <div className="flex gap-3 w-full sm:w-auto">
-                                <Button asChild variant="outline" className="flex-1 sm:flex-none border-gray-200 text-gray-700 font-bold h-12 rounded-full">
+                            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                <Button asChild variant="outline" className="w-full sm:w-auto border-gray-200 text-gray-700 font-bold h-12 rounded-full">
                                     <Link href="/">Seguir Comprando</Link>
                                 </Button>
                                 <Button
                                     onClick={handleCheckout}
                                     disabled={isCheckingOut}
-                                    className="flex-1 sm:flex-none bg-gray-900 text-white font-bold h-12 px-8 rounded-full hover:bg-gray-800 shadow-lg shadow-gray-900/10 hover:shadow-gray-900/20 transform hover:-translate-y-0.5 transition-all"
+                                    className="w-full sm:w-auto bg-gray-900 text-white font-bold h-12 px-8 rounded-full hover:bg-gray-800 shadow-lg shadow-gray-900/10 hover:shadow-gray-900/20 transform hover:-translate-y-0.5 transition-all"
                                 >
                                     {isCheckingOut ? 'Procesando...' : 'Confirmar Compra'}
                                 </Button>

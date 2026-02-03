@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import { getUserOrders } from '@/lib/data';
+import { getUserOrders, getUserProfile } from '@/lib/data';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -66,6 +66,7 @@ export default async function ProfilePage() {
 
     // User View (Existing Logic)
     const orders = await getUserOrders(session.user.id);
+    const userProfile = await getUserProfile(session.user.id);
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -73,7 +74,14 @@ export default async function ProfilePage() {
                 <div className="flex justify-between items-center mb-8">
                     <div>
                         <h1 className="text-3xl font-black text-gray-900">Hola, {session.user.name}</h1>
-                        <p className="text-gray-500">Este es tu historial de compras.</p>
+                        <p className="text-gray-500">{userProfile?.email}</p>
+                        {/* @ts-ignore: Pending Prisma Client regeneration */}
+                        {userProfile?.phoneNumber && (
+                            <p className="text-gray-500 flex items-center gap-1 mt-1">
+                                <span className="material-symbols-outlined text-sm">call</span>
+                                {userProfile.phoneNumber}
+                            </p>
+                        )}
                     </div>
                     <form
                         action={async () => {

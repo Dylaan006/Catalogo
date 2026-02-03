@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { deleteProduct } from '@/lib/actions';
 import Image from 'next/image';
+import { StockToggle } from '@/components/admin/stock-toggle';
 
 export default async function AdminDashboard() {
     const products = await getProducts();
@@ -22,12 +23,13 @@ export default async function AdminDashboard() {
                 </Button>
             </div>
 
-            <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-                <table className="min-w-full">
+            <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm overflow-x-auto">
+                <table className="min-w-[800px] w-full">
                     <thead>
                         <tr className="border-b border-gray-100">
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50/50">Producto</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50/50">Categoría</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50/50">Stock</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50/50">Precio</th>
                             <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50/50">Acciones</th>
                         </tr>
@@ -50,6 +52,9 @@ export default async function AdminDashboard() {
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
                                             {product.category}
                                         </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <StockToggle productId={product.id} initialInStock={product.inStock} />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         ${product.price}

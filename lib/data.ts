@@ -8,6 +8,7 @@ export async function getProducts(query?: string, category?: string, sort?: stri
         where.OR = [
             { name: { contains: query } },
             { description: { contains: query } },
+            { category: { contains: query } },
         ];
     }
 
@@ -78,5 +79,17 @@ export async function getAllOrders() {
     } catch (error) {
         console.error('Database Error:', error);
         throw new Error('Failed to fetch orders.');
+    }
+}
+
+export async function getUserProfile(userId: string) {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+        return user;
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch user profile.');
     }
 }

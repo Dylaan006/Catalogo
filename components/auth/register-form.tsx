@@ -47,6 +47,20 @@ export function RegisterForm() {
                 />
             </div>
             <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-900" htmlFor="phoneNumber">
+                    Número de Teléfono
+                </label>
+                <input
+                    className="w-full rounded-lg border-gray-300 focus:border-gray-900 focus:ring-gray-900 p-3 text-sm"
+                    id="phoneNumber"
+                    type="tel"
+                    name="phoneNumber"
+                    placeholder="+54 9 11 1234 5678"
+                    required
+                    minLength={10}
+                />
+            </div>
+            <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-gray-900" htmlFor="password">
                     Contraseña
                 </label>

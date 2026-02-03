@@ -37,16 +37,17 @@ export default async function Home(props: {
           </form>
         </div>
 
-        <div className="flex items-center justify-between overflow-x-auto pb-2 gap-4">
-          <div className="flex gap-3 flex-wrap">
-            <Link href={`/?query=${query}&sort=${sort}`}>
-              <div className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full px-6 transition-all border border-gray-800 ${category === '' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800 hover:bg-gray-800 hover:text-white'}`}>
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between w-full">
+          {/* Categorias - Scroll Horizontal */}
+          <div className="flex items-center gap-3 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            <Link href={`/?query=${query}&sort=${sort}`} className="shrink-0">
+              <div className={`flex h-10 cursor-pointer items-center justify-center gap-x-2 rounded-full px-6 transition-all border border-gray-800 ${category === '' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800 hover:bg-gray-800 hover:text-white'}`}>
                 <p className={`text-sm font-bold leading-normal`}>Todos</p>
               </div>
             </Link>
             {categories.map((cat) => (
-              <Link key={cat} href={`/?category=${cat}&query=${query}&sort=${sort}`}>
-                <div className={`flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full px-6 transition-all border border-gray-800 ${category === cat ? 'bg-gray-800 text-white' : 'bg-white text-gray-800 hover:bg-gray-800 hover:text-white'}`}>
+              <Link key={cat} href={`/?category=${cat}&query=${query}&sort=${sort}`} className="shrink-0">
+                <div className={`flex h-10 cursor-pointer items-center justify-center gap-x-2 rounded-full px-6 transition-all border border-gray-800 ${category === cat ? 'bg-gray-800 text-white' : 'bg-white text-gray-800 hover:bg-gray-800 hover:text-white'}`}>
                   <p className={`text-sm font-bold leading-normal`}>
                     {cat}
                   </p>
@@ -55,11 +56,14 @@ export default async function Home(props: {
             ))}
           </div>
 
-          <ProductSort />
+          {/* Ordenar */}
+          <div className="flex-shrink-0 self-end md:self-auto">
+            <ProductSort />
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
         {products.length > 0 ? (
           products.map((product) => (
             <ProductCard key={product.id} product={product} />
@@ -69,14 +73,6 @@ export default async function Home(props: {
             No se encontraron productos{query ? ` para "${query}"` : ''}.
           </div>
         )}
-      </div>
-
-      {/* Mobile Sticky Button */}
-      <div className="md:hidden sticky bottom-6 left-0 right-0 px-4 mt-8 pointer-events-none">
-        <a href="https://wa.me/5491112345678" className="pointer-events-auto flex w-full cursor-pointer items-center justify-center rounded-full h-14 bg-accent-gray text-white gap-2 font-bold shadow-2xl">
-          <span className="material-symbols-outlined">chat</span>
-          <span>Consultar por WhatsApp</span>
-        </a>
       </div>
     </main>
   );

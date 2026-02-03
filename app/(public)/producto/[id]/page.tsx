@@ -58,10 +58,12 @@ export default async function ProductPage(props: { params: Promise<{ id: string 
                     {/* Product Info Section */}
                     <div className="flex flex-col w-full lg:w-[420px] gap-8">
                         <div className="flex flex-col gap-3">
-                            <span className="bg-gray-100 text-gray-800 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded w-fit">En stock</span>
-                            <h1 className="text-gray-900 text-4xl font-black leading-tight tracking-[-0.033em]">{product.name}</h1>
-                            <div className="flex items-center gap-4 mt-1">
+                            <h1 className="text-gray-900 text-3xl lg:text-4xl font-black leading-tight tracking-[-0.033em]">{product.name}</h1>
+                            <div className="flex flex-col mt-1">
                                 <p className="text-3xl font-black text-gray-900">{formattedPrice}</p>
+                                {!product.inStock && (
+                                    <p className="text-sm font-medium text-red-500 mt-1">Sin Stock</p>
+                                )}
                             </div>
                         </div>
 
@@ -89,29 +91,50 @@ export default async function ProductPage(props: { params: Promise<{ id: string 
                                     <span className="text-sm text-gray-500 font-medium">Categoría</span>
                                     <span className="text-sm font-semibold text-gray-900">{product.category}</span>
                                 </div>
-                                <div className="flex justify-between items-center py-2 border-b border-dashed border-gray-200">
-                                    <span className="text-sm text-gray-500 font-medium">Disponibilidad</span>
-                                    <span className="text-sm font-semibold text-gray-900">Inmediata</span>
-                                </div>
+                                {(() => {
+                                    try {
+                                        // @ts-ignore
+                                        const specs = product.specifications ? JSON.parse(product.specifications) : {};
+                                        return Object.entries(specs).map(([key, value]) => (
+                                            <div key={key} className="flex justify-between items-center py-2 border-b border-dashed border-gray-200">
+                                                <span className="text-sm text-gray-500 font-medium">{key}</span>
+                                                <span className="text-sm font-semibold text-gray-900">{value as string}</span>
+                                            </div>
+                                        ));
+                                    } catch (e) {
+                                        return null;
+                                    }
+                                })()}
                             </div>
                         </div>
 
                     </div>
                 </div>
 
-                <div className="mt-20 py-10 border-t border-gray-200">
-                    <h2 className="text-2xl font-bold mb-8 text-gray-900">Contenido de la caja</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <div className="bg-white p-6 rounded-2xl text-center border border-gray-100 transition-all hover:shadow-md flex flex-col items-center gap-2">
-                            <span className="material-symbols-outlined text-3xl text-gray-900">inventory_2</span>
-                            <p className="text-sm font-bold text-gray-900">Producto Original</p>
-                        </div>
-                        <div className="bg-white p-6 rounded-2xl text-center border border-gray-100 transition-all hover:shadow-md flex flex-col items-center gap-2">
-                            <span className="material-symbols-outlined text-3xl text-gray-900">verified</span>
-                            <p className="text-sm font-bold text-gray-900">Garantía</p>
-                        </div>
-                    </div>
-                </div>
+                {(() => {
+                    try {
+                        // @ts-ignore
+                        const boxItems = product.boxContent ? JSON.parse(product.boxContent) : [];
+
+                        if (!Array.isArray(boxItems) || boxItems.length === 0) return null;
+
+                        return (
+                            <div className="mt-20 py-10 border-t border-gray-200">
+                                <h2 className="text-2xl font-bold mb-8 text-gray-900">Contenido</h2>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                    {boxItems.map((item: string, idx: number) => (
+                                        <div key={idx} className="bg-white p-6 rounded-2xl text-center border border-gray-100 transition-all hover:shadow-md flex flex-col items-center gap-2">
+                                            <span className="material-symbols-outlined text-3xl text-gray-900">check_circle</span>
+                                            <p className="text-sm font-bold text-gray-900">{item}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    } catch (e) {
+                        return null;
+                    }
+                })()}
 
             </div>
         </div>
